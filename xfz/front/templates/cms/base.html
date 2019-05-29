@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{% block title %}{% endblock %} | 小饭桌管理系统</title>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="{% static 'adminlte/bower_components/bootstrap/dist/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'adminlte/bower_components/font-awesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'adminlte/dist/css/AdminLTE.min.css' %}">
+    <link rel="stylesheet" href="{% static 'adminlte/dist/css/skins/_all-skins.min.css' %}">
+    <link rel="stylesheet" href="{% static 'adminlte/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css' %}">
+    <link rel="stylesheet" href="{% static 'sweetalert/sweetalert.css' %}">
+    <script src="{% static 'adminlte/bower_components/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'adminlte/bower_components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'adminlte/dist/js/adminlte.min.js' %}"></script>
+    <script src="{% static 'sweetalert/sweetalert.min.js' %}"></script>
+    <script src="{% static 'js_dist/xfzajax.min.js' %}"></script>
+    <script src="{% static 'js_dist/xfzalert.min.js' %}"></script>
+    <script src="{% static 'js_dist/message.min.js' %}"></script>
+    {% block head %}{% endblock %}
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+    <header class="main-header">
+        <a href="index2.html" class="logo">
+            <span class="logo-mini"><b>CMS</b></span>
+            <span class="logo-lg"><b>小饭桌</b>后台管理系统</span>
+        </a>
+        <nav class="navbar navbar-static-top">
+            <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+                <span class="sr-only">Toggle navigation</span>
+            </a>
+            <div class="navbar-custom-menu">
+                <ul class="nav navbar-nav">
+                    <li class="dropdown user user-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <img src="http://127.0.0.1:8000/media/10017014786470532.jpg" class="user-image" alt="User Image">
+                            <span class="hidden-xs">李兆江</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="user-header">
+                                <img src="http://127.0.0.1:8000/media/10017014786470532.jpg" class="img-circle" alt="User Image">
+
+                                <p>
+                                    李兆江
+                                    <small>Python web开发工程师</small>
+                                </p>
+                            </li>
+                            <li class="user-footer">
+                                <div class="pull-left">
+                                    <a href="#" class="btn btn-default btn-flat">个人中心</a>
+                                </div>
+                                <div class="pull-right">
+                                    <a href="#" class="btn btn-default btn-flat">退出登录</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <aside class="main-sidebar">
+        <section class="sidebar">
+            {#  左侧用户显示  #}
+            <div class="user-panel">
+                <div class="pull-left image">
+                    <img src="http://127.0.0.1:8000/media/10017014786470532.jpg" class="img-circle" alt="User Image">
+                </div>
+                <div class="pull-left info">
+                    <p>李兆江</p>
+                    <a href="#"><i class="fa fa-circle text-success"></i> 在线</a>
+                </div>
+            </div>
+            {#  搜索框  #}
+            <form action="#" method="get" class="sidebar-form">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" placeholder="查找...">
+                    <span class="input-group-btn">
+                <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+                </button>
+              </span>
+                </div>
+            </form>
+            {#  左侧导航  #}
+            <ul class="sidebar-menu" data-widget="tree">
+                <li class="active">
+                    <a href="{% url 'cms:index' %}">
+                        <i class="fa fa-home"></i>
+                        <span >首页</span>
+                    </a>
+                </li>
+                <li class="header">新闻管理</li>
+                <li>
+                    <a href="{% url 'cms:write_news' %}">
+                        <i class="fa fa-edit"></i>
+                        <span>发布新闻</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'cms:news_category' %}">
+                        <i class="fa fa-tag"></i>
+                        <span>新闻分类</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'cms:banners' %}">
+                        <i class="fa fa-window-restore"></i>
+                        <span>轮播图</span>
+                    </a>
+                </li>
+            </ul>
+        </section>
+        <!-- /.sidebar -->
+    </aside>
+    <div class="content-wrapper">
+        <section class="content-header">{% block content-header %}{% endblock %}</section>
+        <section class="content">{% block content %}{% endblock %}</section>
+    </div>
+    <footer class="main-footer">
+        <b>小饭桌</b>后台管理系统
+    </footer>
+</div>
+</body>
+</html>
