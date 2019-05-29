@@ -1,4 +1,3 @@
-
 function Banners() {
 
 }
@@ -8,10 +7,10 @@ Banners.prototype.loadData = function () {
     xfzajax.get({
         'url': '/cms/banner_list/',
         'success': function (result) {
-            if(result['code'] === 200){
+            if (result['code'] === 200) {
                 var banners = result['data'];
                 console.log(banners);
-                for(var i=0; i<banners.length;i++){
+                for (var i = 0; i < banners.length; i++) {
                     var banner = banners[i];
                     self.createBannerItem(banner);
                 }
@@ -22,14 +21,14 @@ Banners.prototype.loadData = function () {
 
 Banners.prototype.createBannerItem = function (banner) {
     var self = this;
-    var tpl = template("banner-item",{"banner":banner});
+    var tpl = template("banner-item", {"banner": banner});
     var bannerListGroup = $(".banner-list-group");
 
     var bannerItem = null;
-    if(banner){
+    if (banner) {
         bannerListGroup.append(tpl);
         bannerItem = bannerListGroup.find(".banner-item:last");
-    }else{
+    } else {
         bannerListGroup.prepend(tpl);
         bannerItem = bannerListGroup.find(".banner-item:first");
     }
@@ -44,7 +43,7 @@ Banners.prototype.listenAddBannerEvent = function () {
     addBtn.click(function () {
         var bannerListGroup = $('.banner-list-group');
         var length = bannerListGroup.children().length;
-        if(length >= 6){
+        if (length >= 6) {
             window.messageBox.showInfo('最多只能添加6张轮播图！');
             return;
         }
@@ -63,16 +62,16 @@ Banners.prototype.addImageSelectEvent = function (bannerItem) {
     imageInput.change(function () {
         var file = this.files[0];
         var formData = new FormData();
-        formData.append("file",file);
+        formData.append("file", file);
         xfzajax.post({
             'url': '/cms/upload_file/',
             'data': formData,
             'processData': false,
             'contentType': false,
             'success': function (result) {
-                if(result['code'] === 200){
+                if (result['code'] === 200) {
                     var url = result['data']['url'];
-                    image.attr('src',url);
+                    image.attr('src', url);
                 }
             }
         });
@@ -84,7 +83,7 @@ Banners.prototype.addRemoveBannerEvent = function (bannerItem) {
 
     closeBtn.click(function () {
         var bannerId = bannerItem.attr('data-banner-id');
-        if(bannerId){
+        if (bannerId) {
             xfzalert.alertConfirm({
                 'text': '您确定要删除这个轮播图吗?',
                 'confirmCallback': function () {
@@ -94,7 +93,7 @@ Banners.prototype.addRemoveBannerEvent = function (bannerItem) {
                             'banner_id': bannerId
                         },
                         'success': function (result) {
-                            if(result['code'] === 200){
+                            if (result['code'] === 200) {
                                 bannerItem.remove();
                                 window.messageBox.showSuccess('轮播图删除才成功！');
                             }
@@ -102,7 +101,7 @@ Banners.prototype.addRemoveBannerEvent = function (bannerItem) {
                     });
                 }
             });
-        }else{
+        } else {
             bannerItem.remove();
         }
     });
@@ -116,9 +115,9 @@ Banners.prototype.addSaveBannerEvent = function (bannerItem) {
     var prioritySpan = bannerItem.find('span[class="priority"]');
     var bannerId = bannerItem.attr("data-banner-id");
     var url = '';
-    if(bannerId){
+    if (bannerId) {
         url = '/cms/edit_banner/';
-    }else{
+    } else {
         url = '/cms/add_banner/';
     }
     saveBtn.click(function () {
@@ -127,22 +126,22 @@ Banners.prototype.addSaveBannerEvent = function (bannerItem) {
         var link_to = linktoTag.val();
         xfzajax.post({
             'url': url,
-            'data':{
+            'data': {
                 'image_url': image_url,
                 'priority': priority,
                 'link_to': link_to,
                 'pk': bannerId
             },
             'success': function (result) {
-                if(result['code'] === 200){
-                    if(bannerId){
+                if (result['code'] === 200) {
+                    if (bannerId) {
                         window.messageBox.showSuccess('轮播图修改成功！');
-                    }else{
+                    } else {
                         bannerId = result['data']['banner_id'];
-                        bannerItem.attr('data-banner-id',bannerId);
+                        bannerItem.attr('data-banner-id', bannerId);
                         window.messageBox.showSuccess('轮播图添加完成！');
                     }
-                    prioritySpan.text("优先级："+priority);
+                    prioritySpan.text("优先级：" + priority);
                 }
             }
         });

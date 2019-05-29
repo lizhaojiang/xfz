@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from utils import restful
-from .models import News,NewsCategory,Comment
+from .models import News, NewsCategory, Comment
 from django.conf import settings
-from .serializers import NewsSerializer,CommentSerializer
+from .serializers import NewsSerializer, CommentSerializer
 from django.http import Http404
 from .forms import PublicCommentForm
 from apps.xfzauth.decorators import xfz_login_require
@@ -17,15 +17,15 @@ def index(request):
     count = settings.ONE_PAGE_NEWS_COUNT
 
     # 使用select_related查询页面中需要使用的外键,减少数据库的查询
-    newses = News.objects.select_related('category','author').all()[0:count]
+    newses = News.objects.select_related('category', 'author').all()[0:count]
 
     # 新闻分类不会经常变化可以使用缓冲来保存
     categories = NewsCategory.objects.all()
     context = {
-        'newses':newses,
-        'categories':categories
+        'newses': newses,
+        'categories': categories
     }
-    return render(request,'news/index.html',context=context)
+    return render(request, 'news/index.html', context=context)
 
 
 def news_list(request):
@@ -35,38 +35,37 @@ def news_list(request):
     :return:
     设置新闻的页数是通过地址栏中的查询字符串来传递 news/list/?p=1
     """
-    page = int(request.GET.get('p',1))
+    page = int(request.GET.get('p', 1))
     # 分类为0 表示当不进行任何筛选 默认按照时间进行排序
-    category_id = int(request.GET.get('category_id',0))
+    category_id = int(request.GET.get('category_id', 0))
 
-    start = (page-1)*settings.ONE_PAGE_NEWS_COUNT
+    start = (page - 1) * settings.ONE_PAGE_NEWS_COUNT
     end = start + settings.ONE_PAGE_NEWS_COUNT
 
     if category_id == 0:
         # 如果没有选择分类,默认是最新分类,查询展示所有分类
-        newses = News.objects.select_related('category','author').all()[start:end]
+        newses = News.objects.select_related('category', 'author').all()[start:end]
     else:
         # 查询指定分类id
-        newses = News.objects.select_related('category','author').filter(category__id=category_id)[start:end]
+        newses = News.objects.select_related('category', 'author').filter(category__id=category_id)[start:end]
 
     # 使用rest_framework框架对查询的数据进行序列化,主要对返回使用外键查询的字段
     # 因为newses是查询出来的多个数据,是QuerySet对象，所以要添加many=True
-    serializer = NewsSerializer(newses,many=True)
+    serializer = NewsSerializer(newses, many=True)
     data = serializer.data
     return restful.result(data=data)
 
 
-def news_detail(request,news_id):
-
+def news_detail(request, news_id):
     try:
-        news = News.objects.select_related('category','author').prefetch_related("comments__author").get(pk=news_id)
+        news = News.objects.select_related('category', 'author').prefetch_related("comments__author").get(pk=news_id)
         # 评论可以通过Comment中的新闻id查询到
         # 也可以通过news.comment_set查询
         # comments = Comment.objects.select_related('author').filter(news_id=news.pk)
         context = {
-            'news':news,
+            'news': news,
         }
-        return render(request,'news/news_detail.html',context=context)
+        return render(request, 'news/news_detail.html', context=context)
     except News.DoesNotExist:
         raise Http404
 
@@ -93,6 +92,5 @@ def public_comment(request):
         return restful.params_error(message=forms.get_errors())
 
 
-
 def search(request):
-    return render(request,'search/search.html')
+    return render(request, 'search/search.html')
