@@ -19,7 +19,7 @@ CourseDetail.prototype.initPlayer = function () {
             controls: true,
             tokenEncrypt: true,
             // AccessKey
-            ak: '42455a8c985649aeaa4ca86b50482d78'
+            ak: '299e631d08274d52bbf89ed3d5507ebc'
         });
 
         player.on('beforePlay',function (e) {

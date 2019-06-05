@@ -4,12 +4,15 @@ from django.views.decorators.http import require_POST, require_GET
 from django.views.generic import View
 from apps.news.models import NewsCategory, News, Banner
 from utils import restful
-from .forms import EditNewsCategoryForm, WriteNewsForm, AddBannerForm, EditBannerForm
+from .forms import EditNewsCategoryForm, WriteNewsForm, AddBannerForm, EditBannerForm, EditNewsForm
 import os
-from django.conf import settings
 import qiniu
 from django.conf import settings
 from apps.news.serializers import BannerSerializer
+from django.core.paginator import Paginator
+from datetime import datetime
+from django.utils.timezone import make_aware
+from urllib import parse
 
 
 @staff_member_required(login_url='index')
@@ -20,6 +23,99 @@ def index(request):
     :return: 未登录跳转到首页
     """
     return render(request, 'cms/index.html')
+
+
+class NewsListView(View):
+    def get(self, request):
+        """
+        后台新闻列表页面
+        :page 页码,从地址栏获取
+        :newses 需要分页的类
+        :paginator 实例化分页的对象
+        :page_obj 当前分页的对象
+        """
+        page = int(request.GET.get('p', 1))
+
+        start = request.GET.get('start')
+        end = request.GET.get('end')
+        title = request.GET.get('title')
+        category_id = int(request.GET.get('category', 0) or 0)
+        newses = News.objects.select_related('category', 'author')
+
+        # 判断查询日期是否传递 ,如果有按传递的值查询 如果只有开始日期那么结束日期默认就是当天日期 如果只有结束日期,开始日期就是指定日期
+        if start or end:
+            if start:
+                start_date = datetime.strptime(start, "%Y/%m/%d")
+            else:
+                start_date = datetime(year=2019, month=1, day=1)
+
+            if end:
+                end_date = datetime.strptime(end, "%Y/%m/%d")
+            else:
+                end_date = datetime.today()
+            newses = newses.filter(pub_time__range=(make_aware(start_date), make_aware(end_date)))
+
+        # 判断标题,如果存在就查询是否包含此title
+        if title:
+            newses = newses.filter(title__icontains=title)
+
+        if category_id:
+            newses = newses.filter(category=category_id)
+
+        paginator = Paginator(newses, settings.ONE_PAGE_NEWS_LIST_COUNT)
+        page_obj = paginator.page(page)
+
+        context_data = self.get_pagination_data(paginator, page_obj)
+
+        context = {
+            'categories': NewsCategory.objects.all(),
+            'newses': page_obj.object_list,
+            'page_obj': page_obj,
+            'paginator': paginator,
+            'start': start,
+            'end': end,
+            'title': title,
+            'category_id': category_id,
+            'url_query': '&' + parse.urlencode({
+                'start': start or '',
+                'end': end or '',
+                'title': title or '',
+                'category': category_id or ''
+            })
+        }
+        context.update(context_data)
+
+        return render(request, 'cms/news_list.html', context=context)
+
+    def get_pagination_data(self, paginator, page_obj, around_count=2):
+        current_page = page_obj.number
+        num_pages = paginator.num_pages
+
+        left_has_more = False
+        right_has_more = False
+
+        if current_page <= around_count + 2:
+            left_pages = range(1, current_page)
+        else:
+            left_has_more = True
+            left_pages = range(current_page - around_count, current_page)
+
+        if current_page >= num_pages - around_count - 1:
+            right_pages = range(current_page + 1, num_pages + 1)
+        else:
+            right_has_more = True
+            right_pages = range(current_page + 1, current_page + around_count + 1)
+
+        return {
+            # left_pages：代表的是当前这页的左边的页的页码
+            'left_pages': left_pages,
+            # right_pages：代表的是当前这页的右边的页的页码
+            'right_pages': right_pages,
+            'current_page': current_page,
+            'left_has_more': left_has_more,
+            'right_has_more': right_has_more,
+            'num_pages': num_pages
+        }
 
 
 class WriteNewsView(View):
@@ -65,6 +161,56 @@ class WriteNewsView(View):
             return restful.ok()
         else:
             return restful.params_error(message=form.get_errors())
+
+
+class EditNewsView(View):
+    """
+    修改新闻
+    """
+
+    def get(self, request):
+        news_id = request.GET.get('news_id')
+        news = News.objects.get(pk=news_id)
+        context = {
+            'news': news,
+            'categories': NewsCategory.objects.all()
+        }
+        return render(request, 'cms/write_news.html', context=context)
+
+    def post(self, request):
+        # 获取数据
+        form = EditNewsForm(request.POST)
+        # 验证数据接收数据
+        if form.is_valid():
+            title = form.cleaned_data.get('title')
+            desc = form.cleaned_data.get('desc')
+            thumbnail = form.cleaned_data.get('thumbnail')
+            content = form.cleaned_data.get('content')
+            category_id = form.cleaned_data.get('category')
+            pk = form.cleaned_data.get('pk')
+            category = NewsCategory.objects.get(pk=category_id)
+            News.objects.filter(pk=pk).update(
+                title=title,
+                desc=desc,
+                thumbnail=thumbnail,
+                content=content,
+                category=category
+            )
+            return restful.ok()
+        else:
+            return restful.params_error(message=form.get_errors())
+
+
+@require_POST
+def delete_news(request):
+    """
+    删除新闻
+    :param request:news_id
+    :return:
+    """
+    news_id = request.POST.get('news_id')
+    News.objects.filter(pk=news_id).delete()
+    return restful.ok()
 
 
 @require_GET

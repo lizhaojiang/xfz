@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from utils import restful
-from .models import News, NewsCategory, Comment
+from .models import News, NewsCategory, Comment, Banner
 from django.conf import settings
 from .serializers import NewsSerializer, CommentSerializer
 from django.http import Http404
@@ -23,7 +23,8 @@ def index(request):
     categories = NewsCategory.objects.all()
     context = {
         'newses': newses,
-        'categories': categories
+        'categories': categories,
+        'banners':Banner.objects.all()
     }
     return render(request, 'news/index.html', context=context)
 

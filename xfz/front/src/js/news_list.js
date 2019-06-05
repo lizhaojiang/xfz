@@ -30,7 +30,7 @@ CMSNewsList.prototype.listenDeleteEvent = function () {
         var btn = $(this);
         var news_id = btn.attr('data-news-id');
         xfzalert.alertConfirm({
-            'text': '您是否要删除这篇新闻吗？',
+            'text': '您确定要删除这篇新闻吗？',
             'confirmCallback': function () {
                 xfzajax.post({
                     'url': '/cms/delete_news/',

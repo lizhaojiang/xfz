@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
@@ -26,9 +25,6 @@ SECRET_KEY = '=u$w69hw2qxdprc%3w3(ng&)f+@d)l%+q-w_z16iejl=+=h@1x'
 DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1']
-
-
-
 
 # Application definition
 
@@ -42,6 +38,7 @@ INSTALLED_APPS = [
     'apps.xfzauth',
     'apps.cms',
     'apps.news',
+    'apps.course',
     'apps.ueditor',
     'rest_framework',
     'debug_toolbar',
@@ -63,7 +60,7 @@ ROOT_URLCONF = 'xfz.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR,'front','templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'front', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -72,8 +69,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
-            #设置static静态文件的路径,以后再模板中使用不需要再使用load
-            'builtins':[
+            # 设置static静态文件的路径,以后再模板中使用不需要再使用load
+            'builtins': [
                 'django.templatetags.static'
             ]
         },
@@ -81,7 +78,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'xfz.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
@@ -96,7 +92,6 @@ DATABASES = {
         'PASSWORD': '123456'
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
@@ -116,20 +111,17 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-#自定义user类,需要再系统中设置AUTH_USER_MODEL(app.模型),不设置django会使用默认的user
+# 自定义user类,需要再系统中设置AUTH_USER_MODEL(app.模型),不设置django会使用默认的user
 AUTH_USER_MODEL = 'xfzauth.User'
 
-
-#配置缓冲,使用memcached
+# 配置缓冲,使用memcached
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        #配置可以访问的ip,多个IP使用列表
+        # 配置可以访问的ip,多个IP使用列表
         'LOCATION': '127.0.0.1:11211'
     }
 }
-
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
@@ -144,44 +136,43 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
-#配置静态文件的路径
+# 配置静态文件的路径
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR,'front','dist')
+    os.path.join(BASE_DIR, 'front', 'dist')
 ]
 
-#配置上传文件的保存路径
+# 配置上传文件的保存路径
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR,'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-
-
-#设置上传到七牛云
+# 设置上传到七牛云
 QINIU_ACCESS_KEY = 'DB9RkW4Lvfk9y3PurTMWLGaNyIUI4CE0KdorbpAw'
 QINIU_SECRET_KEY = 'ZHFDIs4ZabIGx9l_RSGGpLh5d3N3LBuZM-uDZ2Nr'
 QINIU_BUCKET_NAME = 'hdvideo'
 QINIU_DOMAIN = 'http://ps0j0p5j6.bkt.clouddn.com'
 
-#文件上传地址必须要配置一个
+# 文件上传地址必须要配置一个
 UEDITOR_UPLOAD_TO_QINIU = True
 UEDITOR_QINIU_ACCESS_KEY = QINIU_ACCESS_KEY
 UEDITOR_QINIU_SECRET_KEY = QINIU_SECRET_KEY
 UEDITOR_QINIU_BUCKET_NAME = QINIU_BUCKET_NAME
 UEDITOR_QINIU_DOMAIN = QINIU_DOMAIN
 
-#使用ueditor文件上传到本地
+# 使用ueditor文件上传到本地
 UEDITOR_UPLOAD_TO_SERVER = True
 UEDITOR_UPLOAD_PATH = MEDIA_ROOT
-#ueditor配置文件
-UEDITOR_CONFIG_PATH = os.path.join(BASE_DIR,'front','dist','ueditor','config.json')
+# ueditor配置文件
+UEDITOR_CONFIG_PATH = os.path.join(BASE_DIR, 'front', 'dist', 'ueditor', 'config.json')
 
+# 配置新闻首页一次加载几篇文章
+ONE_PAGE_NEWS_COUNT = 5
 
-#配置新闻首页一次加载几篇文章
-ONE_PAGE_NEWS_COUNT= 2
+# 配置后台新闻列表展示每页显示几条数据
+ONE_PAGE_NEWS_LIST_COUNT = 5
 
 # django-debug-toolbar配置信息
 INTERNAL_IPS = ['127.0.0.1']
@@ -211,7 +202,12 @@ DEBUG_TOOLBAR_PANELS = [
     # 重定向
     # 'debug_toolbar.panels.redirects.RedirectsPanel',
 ]
-DEBUG_TOOLBAR_CONFIG= {
-    'JQUERY_URL':''
+DEBUG_TOOLBAR_CONFIG = {
+    'JQUERY_URL': ''
 }
 
+# 百度云点播设置
+# 控制台->用户中心->用户ID
+BAIDU_CLOUD_USER_ID = 'e7369fa303254a56bc1dc5d1a03ecaa5'
+# 点播VOD->全局设置->发布设置->安全设置->UserKey
+BAIDU_CLOUD_USER_KEY = '59e38231d63d42da'
