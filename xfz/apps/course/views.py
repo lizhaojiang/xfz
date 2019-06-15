@@ -2,14 +2,18 @@ import hashlib
 import hmac
 import os
 import time
+from hashlib import md5
+from django.shortcuts import reverse
 from django.shortcuts import render
 from django.views import View
 from django.conf import settings
 from utils import restful
-from .models import Course, Teacher,CourseOrder
+from .models import Course, Teacher, CourseOrder
 from django.http import Http404
 from .forms import WriteTeachForm, EditTeachForm
 from apps.xfzauth.decorators import xfz_login_require
+from django.views.decorators.csrf import csrf_exempt
+
 
 def course_index(request):
     """
@@ -21,17 +25,20 @@ def course_index(request):
     return render(request, 'course/course_index.html', context=context)
 
 
+@xfz_login_require
 def course_detail(request, course_id):
     """
     课程详情页面
     """
     try:
         course = Course.objects.get(pk=course_id)
+        buyed = CourseOrder.objects.filter(course=course, buyer=request.user, status=2).exists()
     except Course.DoesNotExist:
         return Http404
 
     context = {
-        'course': course
+        'course': course,
+        'buyed': buyed
     }
 
     return render(request, 'course/course_detail.html', context=context)
@@ -44,9 +51,9 @@ def course_token(request):
     # video：是视频文件的完整链接
     file = request.GET.get('video')
 
-    # course_id = request.GET.get('course_id')
-    # if not CourseOrder.objects.filter(course_id=course_id, buyer=request.user, status=2).exists():
-    #     return restful.params_error(message='请先购买课程！')
+    course_id = request.GET.get('course_id')
+    if not CourseOrder.objects.filter(course_id=course_id, buyer=request.user, status=2).exists():
+        return restful.params_error(message='请先购买课程！')
 
     expiration_time = int(time.time()) + 2 * 60 * 60
     USER_ID = settings.BAIDU_CLOUD_USER_ID
@@ -61,8 +68,9 @@ def course_token(request):
     token = '{0}_{1}_{2}'.format(signature, USER_ID, expiration_time)
     return restful.result(data={'token': token})
 
+
 @xfz_login_require
-def course_order(request,course_id):
+def course_order(request, course_id):
     """
     课程支付
     """
@@ -76,12 +84,55 @@ def course_order(request,course_id):
 
     )
 
-
-
     context = {
-        'course':course
+        'goods': {
+            'thumbnail': course.cover_url,
+            'title': course.title,
+            'price': course.price
+        },
+        'order': order,
+        'notify_url': request.build_absolute_uri(reverse('course:notify_view')),
+        'return_url': request.build_absolute_uri(reverse('course:course_detail', kwargs={'course_id': course.pk}))
     }
-    return render(request,'course/course_order.html',context=context)
+    return render(request, 'course/course_order.html', context=context)
+
+
+@xfz_login_require
+def course_order_key(request):
+    goodsname = request.POST.get("goodsname")
+    istype = request.POST.get("istype")
+    notify_url = request.POST.get("notify_url")
+    orderid = request.POST.get("orderid")
+    price = request.POST.get("price")
+    return_url = request.POST.get("return_url")
+
+    token = '210fd55b8c1fa057a0809d5d19cf2e2e'
+    uid = 'f8d2f709829d5994574e61c0'
+    orderuid = str(request.user.pk)
+
+    print('goodsname:', goodsname)
+    print('istype:', istype)
+    print('notify_url:', notify_url)
+    print('orderid:', orderid)
+    print('price:', price)
+    print('return_url:', return_url)
+
+    key = md5((goodsname + istype + notify_url + orderid + orderuid + price + return_url + token + uid).encode(
+        "utf-8")).hexdigest()
+    print('key:', key)
+
+    return restful.result(data={"key": key})
+
+
+# 装饰器表示是去除csrf保护
+@csrf_exempt
+def notify_view(request):
+    orderid = request.POST.get('orderid')
+    # print('='*10)
+    # print(orderid)
+    # print('='*10)
+    CourseOrder.objects.filter(pk=orderid).update(status=2)
+    return restful.ok()
 
 
 class AddTeachView(View):
@@ -146,3 +197,13 @@ class EditTeachView(View):
             return restful.ok()
         else:
             return restful.params_error(message=form.get_errors())
+
+
+class TeachListView(View):
+    def get(self, request):
+        teachers = Teacher.objects.all()
+
+        context = {
+            'teachers': teachers
+        }
+        return render(request, 'course/teach_list.html', context=context)

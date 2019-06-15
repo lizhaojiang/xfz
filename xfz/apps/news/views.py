@@ -6,6 +6,7 @@ from .serializers import NewsSerializer, CommentSerializer
 from django.http import Http404
 from .forms import PublicCommentForm
 from apps.xfzauth.decorators import xfz_login_require
+from django.db.models import Q
 
 
 def index(request):
@@ -24,7 +25,7 @@ def index(request):
     context = {
         'newses': newses,
         'categories': categories,
-        'banners':Banner.objects.all()
+        'banners': Banner.objects.all()
     }
     return render(request, 'news/index.html', context=context)
 
@@ -94,4 +95,9 @@ def public_comment(request):
 
 
 def search(request):
-    return render(request, 'search/search.html')
+    q = request.GET.get('q')
+    context = {}
+    if q:
+        newes = News.objects.filter(Q(title__icontains=q) | Q(content__icontains=q))
+        context['newes'] = newes
+    return render(request, 'search/search.html', context=context)

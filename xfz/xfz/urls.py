@@ -20,7 +20,8 @@ from django.conf import settings
 
 urlpatterns = [
     path('cms/', include('apps.cms.urls')), #后台url
-    path('search/', views.search, name='search'), #搜索页面单独url
+    # path('search/', views.search, name='search'), #搜索页面单独url
+    path('search/', include('haystack.urls')), #搜索页面单独url
     path('',views.index,name='index'), #首页单独url
     path('news/', include('apps.news.urls')), #有关新闻页面
     path('account/', include('apps.xfzauth.urls')), #有关用户权限(登录,退出)

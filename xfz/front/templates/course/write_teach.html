@@ -67,7 +67,7 @@
                         <div class="form-group">
                             <label for="desc-form">职位描述</label>
                             {% if teachers %}
-                                <input type="text" class="form-control" name="jobtitle" value="{{ teachers.jobtitle }}"
+                                <input type="text" class="form-control" name="jobtitle" value="{{ teachers.jobtitle|safe}}"
                                        id="desc-form">
                             {% else %}
                                 <input type="text" class="form-control" name="jobtitle" id="desc-form">

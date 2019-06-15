@@ -205,8 +205,6 @@ class EditNewsView(View):
 def delete_news(request):
     """
     删除新闻
-    :param request:news_id
-    :return:
     """
     news_id = request.POST.get('news_id')
     News.objects.filter(pk=news_id).delete()

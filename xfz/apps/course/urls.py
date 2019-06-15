@@ -10,5 +10,8 @@ urlpatterns = [
     path('course_token/', views.course_token, name='course_token'),
     path('course_order/<int:course_id>/', views.course_order, name='course_order'),
     path('teach/', views.AddTeachView.as_view(), name='teach'),
+    path('course_order_key/', views.course_order_key, name='course_order_key'),
+    path('notify_view/', views.notify_view, name='notify_view'),
     path('edit_teach/', views.EditTeachView.as_view(), name='edit_teach'),
+    path('teach_list/', views.TeachListView.as_view(), name='teach_list'),
 ]

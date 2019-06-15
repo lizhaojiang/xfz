@@ -24,7 +24,7 @@ SECRET_KEY = '=u$w69hw2qxdprc%3w3(ng&)f+@d)l%+q-w_z16iejl=+=h@1x'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1','150.109.40.165']
 
 # Application definition
 
@@ -35,10 +35,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'haystack',
     'apps.xfzauth',
     'apps.cms',
     'apps.news',
     'apps.course',
+    'apps.payinfo',
     'apps.ueditor',
     'rest_framework',
     'debug_toolbar',
@@ -211,3 +214,20 @@ DEBUG_TOOLBAR_CONFIG = {
 BAIDU_CLOUD_USER_ID = 'e7369fa303254a56bc1dc5d1a03ecaa5'
 # 点播VOD->全局设置->发布设置->安全设置->UserKey
 BAIDU_CLOUD_USER_KEY = '59e38231d63d42da'
+
+
+# haystack搜索引擎配置文件
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        # 设置haystack的搜索引擎
+        # 'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'ENGINE': 'apps.news.whoosh_cn_backend.WhooshEngine',
+        # 设置索引文件的位置
+        'PATH': os.path.join(BASE_DIR, 'whoosh_index'),
+    }
+}
+
+#增删改后自动创建索引 生成索引命令:python manage.py rebuild_index
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
+

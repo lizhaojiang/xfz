@@ -1,5 +1,5 @@
 from django.db import models
-
+from shortuuidfield import ShortUUIDField
 
 
 class CourseCategory(models.Model):
@@ -35,11 +35,12 @@ class Course(models.Model):
     pub_time = models.DateTimeField(auto_now_add=True)
 
 class CourseOrder(models.Model):
+    uid = ShortUUIDField(primary_key=True)
     course = models.ForeignKey('Course',on_delete=models.DO_NOTHING)
     buyer = models.ForeignKey('xfzauth.User',on_delete=models.DO_NOTHING)
     amount = models.FloatField(default=0)
     pub_time = models.DateTimeField(auto_now_add=True)
-    # 1表示支付宝支付 2表示微信支付
+    # 0表示支付宝支付 1表示微信支付
     istype = models.SmallIntegerField(default=0)
     # 1表示待支付  2表示支付成功
     status = models.SmallIntegerField(default=1)
